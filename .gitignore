@@ -3,3 +3,4 @@ __pycache__/
 .env
 mlflows
 mlflow
+ml_runs/
