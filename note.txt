@@ -1,0 +1,9 @@
+eivdemment il faut plus labeliser les données pour obtenir de meilleur résultats 
+faire aussi le schéma logique fait dans le cahier 
+
+
+autre : automatiser le workflow alteryx 
+autre mettre en place l'actualisation automatique
+
+
+faudra se connecter a postgre , voir comment faire , plutot un travail pour chez soi apparement 
