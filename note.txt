@@ -7,3 +7,10 @@ autre mettre en place l'actualisation automatique
 
 
 faudra se connecter a postgre , voir comment faire , plutot un travail pour chez soi apparement 
+
+
+on peut bien passer de grand csv dans git avec le gitignore , on peut parser facilement les tables , mais faut un script de mise a jour 
+mettre dans postgre 
+
+
+liste d'adresse test pour voir l'implementation de la logique 
