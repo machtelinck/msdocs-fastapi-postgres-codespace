@@ -1,78 +1,87 @@
-import os
-from typing import Union
-from fastapi import FastAPI
-from pydantic import BaseModel
-
-from dotenv import load_dotenv
-from sqlalchemy import String, Column, Integer, Identity, select
+from sqlalchemy import Column, BigInteger, String, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import create_engine
+import os
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import Column, Integer, String, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
+from fastapi import FastAPI, HTTPException, Depends
+import os
+from sqlalchemy import text
+from sqlalchemy import create_engine, Column, BigInteger, String, and_
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql://admin:LocalPasswordOnly@localhost:5432/postgres"
+)
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, bind=engine)
+Base = declarative_base()
+
+
+class CPVille(Base):
+    __tablename__ = "cp_ville"
+    code_postal = Column(BigInteger, primary_key=True)
+    nom_commune = Column(String, primary_key=True)
+
 
 app = FastAPI()
 
 
-# Pydantic model
-class RestaurantIn(BaseModel):
-    name: str
-    address: Union[str, None] = None
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
-# SqlAlchemy model
-class Base(DeclarativeBase):
-    pass
+@app.get("/test_cp_ville/")
+async def test_cp_ville(db: Session = Depends(get_db)):
+    try:
+        # Exécute une requête SQL brute pour récupérer simplement la première ligne
+        result = db.execute(text("SELECT * FROM cp_ville LIMIT 1")).fetchone()
+        if result:
+            # Convertit le résultat en dict de manière sûre
+            result_dict = {key: value for key, value in result._mapping.items()}
+            return result_dict
+        else:
+            return {"message": "La table cp_ville est vide."}
+    except Exception as e:
+        print(f"Erreur de base de données : {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur interne du serveur: {e}")
 
 
-class Restaurant(Base):
-    __tablename__ = "restaurants"
-    id = Column(Integer, Identity(start=1, cycle=True), primary_key=True)
-    name = Column(String(100), nullable=False)
-    address = Column(String(100), nullable=True)
+@app.get("/verify_cp_ville/")
+async def verify_cp_ville(code_postal: int, nom_commune: str, db: Session = Depends(get_db)):
+    try:
+        query = text("SELECT * FROM cp_ville")
+        results = db.execute(query).fetchall()
+        
+        # Préparation des clés pour accéder aux valeurs dans les résultats
+        key_code_postal = "('code_postal', '')"
+        key_nom_commune = "('nom_commune', '')"
+        
+        # Filtrage des résultats en fonction de code_postal et nom_commune
+        filtered_results = []
+        for row in results:
+            row_dict = {key: value for key, value in row._mapping.items()}
+            if row_dict[key_code_postal] == code_postal and row_dict[key_nom_commune].strip().lower() == nom_commune.strip().lower():
+                filtered_results.append(row_dict)
+        
+        if filtered_results:
+            return {"message": "Résultats trouvés :", "data": filtered_results}
+        else:
+            return {"message": "Erreur : Aucun résultat trouvé pour les critères spécifiés."}
+    except Exception as e:
+        print(f"Erreur de base de données : {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur interne du serveur: {e}")
 
-
-# Connect to the database
-load_dotenv(".env")
-DBUSER = os.environ["DBUSER"]
-DBPASS = os.environ["DBPASS"]
-DBHOST = os.environ["DBHOST"]
-DBNAME = os.environ["DBNAME"]
-DATABASE_URI = f"postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}"
-if DBHOST != "localhost":
-    DATABASE_URI += "?sslmode=require"
-
-engine = create_engine(DATABASE_URI, echo=True)
-
-# Create tables in database
-Base.metadata.create_all(engine)
 
 
 @app.get("/")
-def root():
-    return "Welcome to the FastAPI and Postgres in a dev container demonstration. Add /docs to the URL to see API methods."
-
-
-@app.get("/restaurant/{id}")
-def get_restaurant(id: int):
-    with Session(engine) as session:
-        query = select(Restaurant).where(Restaurant.id == id)
-        restaurants = session.execute(query).scalars().all()
-        return f"{restaurants[0].id}, {restaurants[0].name}, {restaurants[0].address}"
-
-
-@app.post("/restaurant")
-def set_restaurant(item: RestaurantIn):
-    with Session(engine) as session:
-        restaurant = Restaurant(name=item.name, address=item.address)
-        session.add(restaurant)
-        session.commit()
-        return f"Added restaurant with id {restaurant.id}."
-
-
-@app.get("/all")
-def get_all_restaurants():
-    rows = []
-    with Session(engine) as session:
-        resturants = session.query(Restaurant).all()
-        for restaurant in resturants:
-            rows.append(f"{restaurant.id}, {restaurant.name}, {restaurant.address}")
-    return rows
+def read_root():
+    return {"Hello": "Bienvenue sur mon API FastAPI!"}
