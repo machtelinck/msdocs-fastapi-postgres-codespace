@@ -39,13 +39,13 @@ async def verify_cp_ville_rue(code_postal: int, nom_commune: str, nom_rue: str, 
         rues_result = db.execute(text(sql_rues), {"code_postal": code_postal, "nom_commune": nom_commune.lower()}).fetchall()
         rues_df = pd.DataFrame(rues_result, columns=['nom_afnor'])
 
-        # Si la rue exacte est trouvée
+       
         rue_exists = nom_rue.lower() in rues_df['nom_afnor'].str.lower().values
         
         if rue_exists:
             return {"message": "La rue existe pour le code postal et la ville donnés.", "couple_cp_ville_existe": couple_exists}
         else:
-            # Renvoie la première rue trouvée pour ce code postal et cette ville
+ 
             if not rues_df.empty:
                 first_street = rues_df.iloc[0]['nom_afnor']
                 return {

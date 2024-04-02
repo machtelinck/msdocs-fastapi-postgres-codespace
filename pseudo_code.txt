@@ -1,0 +1,13 @@
+"app@toto" (parameters) = 
+if app.get verify_rue_cp_ville = "La rue spécifiée n'existe pas pour le couple code postal-ville donné"
+if ""message": "La rue existe pour le code postal et la ville donnés.", "couple_cp_ville_existe": couple_exists then ok 
+then (make_proposition)  
+"message": "Aucune rue trouvée pour le couple code postal-ville spécifié.",
+"couple_cp_ville_existe": couple_exists
+else rue = rue 
+
+
+
+app@toto -----> recup modele faire proposition , transformer json en df et ensuite renvoyer le resultat du modele , sur le df puis ensuite faire le retour 
+
+( peut être des problème de lenteur a grande échèlles) , a tester mais dans la première implémentation être fonctionnelle 

@@ -1,4 +1,4 @@
-eivdemment il faut plus labeliser les données pour obtenir de meilleur résultats 
+evidemment il faut plus labeliser les données pour obtenir de meilleur résultats 
 faire aussi le schéma logique fait dans le cahier 
 
 
@@ -14,3 +14,30 @@ mettre dans postgre
 
 
 liste d'adresse test pour voir l'implementation de la logique 
+
+
+
+1) utiliser l'endpoint api pour ameliorer la fonction sans l'ecraser faire un autre endpoint pour corriger les adresse avec une proposition etant celui du modele 
+et re se baser sur elle pour indiquer si numero est juste ou pas , si rep et juste ou pas 
+
+un peu un schéma en cascade 
+
+colonne : cp_ville exact , proposition_cp_ville , rue _ proposition rue_ numero rep , score , correspondance juge bonne 
+
+
+
+2)   faire le pseudo code 
+
+X) MACRO et utilisation dans alteryx 
+
+X2) gerer autorisation 
+
+X3) Script pour recuperer la base de données du nord 
+
+X4) voir le referentiel  et faire les écrits une fois fini 
+
+X5) déployer 
+
+
+
+
