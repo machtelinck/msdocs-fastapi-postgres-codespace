@@ -11,3 +11,18 @@ else rue = rue
 app@toto -----> recup modele faire proposition , transformer json en df et ensuite renvoyer le resultat du modele , sur le df puis ensuite faire le retour 
 
 ( peut être des problème de lenteur a grande échèlles) , a tester mais dans la première implémentation être fonctionnelle 
+et ensuite amelirer 
+
+on peut implementer le modele et par la suite le rendre plus performant 
+
+
+
+
+//// rendre l'application vraiment utile ----> verifier le referentiel du projet final -----> l'ameliorer
+
+
+si fait avec un call api , et ensuite avec une macro , on pourra avoir des données plus fiable , marchera pour des petites echelles , mais si c'est pour modifier toute la base a chaque fois 
+il faudra que ça scale plutot bien 
+
+pour cela peut être en batch , mais plus prosaiquement faire les grosse modification avec un alteryx puis une méthode hybride avec l'api et la macro servant a racler les fond plutot 
+
