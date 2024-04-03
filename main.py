@@ -24,12 +24,10 @@ def get_db():
         db.close()
 
 
-def calculate_features(rue_init, prop_lev):
-    # Vérifier si les entrées ne sont pas vides
+async def calculate_features(rue_init, prop_lev):
     if not rue_init or not prop_lev:
         raise ValueError("Les chaînes de caractères ne doivent pas être vides.")
 
-    # Calcul des caractéristiques
     features_dict = {
         "damerau_levenshtein": [textdistance.damerau_levenshtein.normalized_similarity(rue_init, prop_lev)],
         "jaro_winkler": [textdistance.jaro_winkler(rue_init, prop_lev)],
@@ -37,8 +35,7 @@ def calculate_features(rue_init, prop_lev):
         "sorensen_dice": [textdistance.sorensen_dice(rue_init, prop_lev)],
         "lcs": [textdistance.lcsstr.normalized_similarity(rue_init, prop_lev)]
     }
-    
-    # Conversion du dictionnaire en DataFrame
+
     features_df = pd.DataFrame.from_dict(features_dict)
     return features_df
 
@@ -73,34 +70,35 @@ async def verify_cp_ville_rue(code_postal: int, nom_commune: str, nom_rue: str, 
     try:
         couple_exists = await couple_cp_ville_existe(code_postal, nom_commune, db)
         rues_df = await recuperer_rues_cp_ville(code_postal, nom_commune, db)
-        rue_exists = nom_rue.lower() in rues_df['nom_afnor'].str.lower().values
         
-        if rue_exists:
+        if nom_rue.lower() in rues_df['nom_afnor'].str.lower().values:
             return {"message": "La rue existe pour le code postal et la ville donnés.", "couple_cp_ville_existe": couple_exists}
         else:
             if not rues_df.empty:
-                # Calcul des caractéristiques pour "AAAAAA" et "BBBBBB" pour le test
-                test_features = calculate_features("AAAAAA", "BBBBBB")
+                similarity_scores = []
                 
-                features_list = []
                 for x in rues_df['nom_afnor']:
-                    features = calculate_features(nom_rue, x)
-                    features_list.append(features)
+                    features = await calculate_features(nom_rue, x)
+                    # Afficher les caractéristiques calculées pour la paire actuelle
+                    print(f"Caractéristiques pour '{nom_rue}' vs '{x}':", features.to_dict(orient='records')[0])
+                    
+                    # Prédiction du score de similarité pour la paire actuelle
+                    score = model.predict_proba(features)[:, 1][0]  # Prendre le score de la classe "similaire"
+                    similarity_scores.append(score)
+                    # Afficher le score de similarité calculé
+                    print(f"Score de similarité pour '{nom_rue}' vs '{x}': {score}")
                 
-                features_df = pd.concat(features_list, ignore_index=True)
-                
-                similarity_scores = model.predict_proba(features_df)[:, 1]
+                # Ajout des scores de similarité au DataFrame des rues
                 rues_df['similarity_score'] = similarity_scores
                 
-                # Sort the DataFrame by similarity score in descending order and take the top 10 results
-                rues_df_sorted = rues_df.sort_values(by='similarity_score', ascending=False).head(10)
-                top_similar_rues_info = rues_df_sorted[['nom_afnor', 'similarity_score']].to_dict(orient='records')
-
+                # Tri du DataFrame par score de similarité en ordre décroissant
+                rues_df_sorted = rues_df.sort_values(by='similarity_score', ascending=False)
+                top_similar_rues_info = rues_df_sorted.head(10).to_dict(orient='records')
+                
                 return {
-                    "message": "La rue spécifiée n'existe pas pour le couple code postal-ville donné.",
+                    "message": "La rue spécifiée n'existe pas pour le couple code postal-ville donné, voici les suggestions les plus proches.",
                     "couple_cp_ville_existe": couple_exists,
-                    "top_suggestions": top_similar_rues_info,
-                    "test_features_for_AAAAAA_and_BBBBBB": test_features
+                    "top_suggestions": top_similar_rues_info
                 }
             else:
                 return {"message": "Aucune rue trouvée pour le couple code postal-ville spécifié.", "couple_cp_ville_existe": couple_exists}
