@@ -41,3 +41,8 @@ X5) déployer
 
 
 
+https://supreme-space-acorn-v9p9q94v4qjc6pjw-8000.app.github.dev/verify_cp_ville_rue/?code_postal=59000&nom_commune=Lille&nom_rue=SOLFERINO
+
+https://supreme-space-acorn-v9p9q94v4qjc6pjw-8000.app.github.dev/test_calculate_features/
+
+https://supreme-space-acorn-v9p9q94v4qjc6pjw-8000.app.github.dev/test_similarity/
