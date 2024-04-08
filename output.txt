@@ -36,6 +36,25 @@ Language: py
 from django.shortcuts import render
 
 # Create your views here.
+import requests
+
+def verifier_rue(request):
+    code_postal = '59000'
+    nom_commune = 'Lille'
+    nom_rue = 'Soleferino'
+    
+    # URL de votre API FastAPI
+    url_api = f"https://monapi.com/verify_cp_ville_rue/?code_postal={code_postal}&nom_commune={nom_commune}&nom_rue={nom_rue}"
+    
+    # Appeler l'API et récupérer les données
+    reponse = requests.get(url_api)
+    if reponse.status_code == 200:
+        donnees = reponse.json()
+    else:
+        donnees = {'erreur': 'Impossible de récupérer les données'}
+
+    # Passer les données au template
+    return render(request, 'verifier_rue.html', {'donnees': donnees})
 
 ```
 
@@ -103,6 +122,32 @@ Language: py
 ```
 
 ---
+Path: appli_django/templates/verifier_rue.html
+Language: html
+---
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vérification de rue</title>
+</head>
+<body>
+    <h1>Résultats de la vérification de rue</h1>
+    {% if donnees.erreur %}
+        <p>Erreur : {{ donnees.erreur }}</p>
+    {% else %}
+        <p>Code Postal : {{ donnees.code_postal }}</p>
+        <p>Nom de Commune : {{ donnees.nom_commune }}</p>
+        <p>Nom de Rue : {{ donnees.nom_rue }}</p>
+        <!-- Afficher d'autres informations de l'API ici -->
+    {% endif %}
+</body>
+</html>
+
+```
+
+---
 Path: app_django/__init__.py
 Language: py
 ---
@@ -163,28 +208,15 @@ Path: app_django/urls.py
 Language: py
 ---
 ```py
-"""
-URL configuration for app_django project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-
 from django.contrib import admin
 from django.urls import path
+# Importez la vue depuis l'application
+from appli_django.views import verifier_rue
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path('verifier_rue/', verifier_rue, name='verifier_rue'),
+    # Vous pouvez ajouter d'autres chemins ici...
 ]
 
 ```
@@ -207,6 +239,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -216,7 +252,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-n*l8))4uv5oysd90@@h8p-bo2&2en9&9knll6*(bh6i@f1vptx"
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -233,6 +269,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'appli_django',
 ]
 
 MIDDLEWARE = [
@@ -317,6 +354,22 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 ```
 

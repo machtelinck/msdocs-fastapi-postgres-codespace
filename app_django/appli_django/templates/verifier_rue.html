@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vérification de rue</title>
+</head>
+<body>
+    <h1>Résultats de la vérification de rue</h1>
+    {% if donnees.erreur %}
+        <p>Erreur : {{ donnees.erreur }}</p>
+    {% else %}
+        <p>Code Postal : {{ donnees.code_postal }}</p>
+        <p>Nom de Commune : {{ donnees.nom_commune }}</p>
+        <p>Nom de Rue : {{ donnees.nom_rue }}</p>
+        <!-- Afficher d'autres informations de l'API ici -->
+    {% endif %}
+</body>
+</html>
