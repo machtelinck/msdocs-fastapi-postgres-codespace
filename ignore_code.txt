@@ -1,0 +1,17 @@
+.env 
+gitignore
+__pycache__
+ml_runs
+.github
+csv
+xlsx
+__pycache__/
+.azure
+.env
+mlflows
+mlflow
+ml_runs/
+.csv
+csv
+adresses-59.csv
+pickle_try/
