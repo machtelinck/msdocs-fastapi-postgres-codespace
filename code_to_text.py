@@ -12,6 +12,9 @@ EXTENSION_LANGUAGE = {
     '.yml': 'yml',
 }
 
+# List of binary file extensions to ignore
+BINARY_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.exe', '.dll', '.bin', '.o', '.db', '.sqlite3']
+
 
 def read_ignore_patterns(ignore_file_path):
     """
@@ -74,9 +77,12 @@ def read_and_combine_files(input_directory, output_file, ignore_file_path):
                 file_path = os.path.join(root, file)
                 if is_ignored(file_path, ignore_patterns, input_directory):
                     continue  # Skip the ignored file
+
+                _, extension = os.path.splitext(file)
+                if extension.lower() in BINARY_EXTENSIONS:
+                    continue  # Skip binary files
                 
                 relative_path = os.path.relpath(file_path, input_directory)
-                _, extension = os.path.splitext(file)
                 language = EXTENSION_LANGUAGE.get(extension, '')
 
                 try:
@@ -92,7 +98,6 @@ def read_and_combine_files(input_directory, output_file, ignore_file_path):
 
 
 if __name__ == '__main__':
-
     project_path = '/workspace/app_django'
     output_file = '/workspace/output.txt'
     ignore_file = '/workspace/ignore_code.txt'

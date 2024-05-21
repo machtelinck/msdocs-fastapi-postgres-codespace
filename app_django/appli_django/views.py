@@ -2,19 +2,25 @@ from django.shortcuts import render
 import requests
 
 def verifier_rue(request):
-    code_postal = '59000'
-    nom_commune = 'Lille'
-    nom_rue = 'Soleferino'
+    code_postal = request.GET.get('code_postal', '59000')
+    nom_commune = request.GET.get('nom_commune', 'LILLE')
+    nom_rue = request.GET.get('nom_rue', 'SOLFERINO')
+
+    params = {
+        'code_postal': code_postal,
+        'nom_commune': nom_commune,
+        'nom_rue': nom_rue,
+    }
     
-    # Remplacez cette URL par l'URL de votre API FastAPI, en vous assurant d'utiliser le bon port
-    url_api = f"http://localhost:8001/verify_cp_ville_rue/?code_postal={code_postal}&nom_commune={nom_commune}&nom_rue={nom_rue}"
-    
-    # Appeler l'API et récupérer les données
-    reponse = requests.get(url_api)
+    url_api = "http://localhost:8000/verify_cp_ville_rue/"
+    reponse = requests.get(url_api, params=params)
+
     if reponse.status_code == 200 and reponse.content:
         donnees = reponse.json()
+        # Vérifiez si 'top_suggestions' est présent dans les données
+        top_suggestions = donnees.get('top_suggestions', [])  # Utilisez une liste vide comme valeur par défaut
     else:
         donnees = {'erreur': 'Impossible de récupérer les données ou réponse vide'}
+        top_suggestions = []  # Initialisez top_suggestions comme une liste vide dans ce cas
 
-    # Passer les données au template
-    return render(request, 'verifier_rue.html', {'donnees': donnees})
+    return render(request, 'verifier_rue.html', {'donnees': donnees, 'top_suggestions': top_suggestions})

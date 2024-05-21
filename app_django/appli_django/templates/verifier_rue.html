@@ -2,17 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../static/css/style.css">
     <title>Vérification de rue</title>
 </head>
 <body>
+<div class="container">
     <h1>Résultats de la vérification de rue</h1>
-    {% if donnees.erreur %}
-        <p>Erreur : {{ donnees.erreur }}</p>
-    {% else %}
-        <p>Code Postal : {{ donnees.code_postal }}</p>
-        <p>Nom de Commune : {{ donnees.nom_commune }}</p>
-        <p>Nom de Rue : {{ donnees.nom_rue }}</p>
-        <!-- Afficher d'autres informations de l'API ici -->
+    <form action="{% url 'verifier_rue' %}" method="get">
+        <div>
+            <label for="code_postal">Code Postal:</label>
+            <input type="text" id="code_postal" name="code_postal" placeholder="Entrez le code postal" required>
+        </div>
+        <div>
+            <label for="nom_commune">Nom de Commune:</label>
+            <input type="text" id="nom_commune" name="nom_commune" placeholder="Entrez le nom de la commune" required>
+        </div>
+        <div>
+            <label for="nom_rue">Nom de Rue:</label>
+            <input type="text" id="nom_rue" name="nom_rue" placeholder="Entrez le nom de la rue" required>
+        </div>
+        <button type="submit">Vérifier</button>
+    </form>
+    {% if donnees %}
+        {% if donnees.erreur %}
+            <p class="error">Erreur : {{ donnees.erreur }}</p>
+        {% else %}
+            <p>{{ donnees.message }}</p>
+            {% if donnees.couple_cp_ville_existe %}
+                <div class="suggestions">
+                    <h2>Suggestions de rues</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nom de la Rue</th>
+                                <th>Score de Similarité</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for suggestion in top_suggestions %}
+                                <tr>
+                                    <td>{{ suggestion.nom_afnor }}</td>
+                                    <td class="similarity-score">{{ suggestion.similarity_score }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        {% endif %}
     {% endif %}
+</div>
 </body>
 </html>
