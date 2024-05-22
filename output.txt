@@ -34,9 +34,97 @@ Language: css
 ---
 ```css
 body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
     display: flex;
-    grid-template-columns: 200px 1fr;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+}
+
+form div {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    margin: 20px auto;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+.error {
+    color: red;
+    text-align: center;
+}
+
+.suggestions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.similarity-score {
+    font-size: 0.9em;
+    color: #555;
+}
+
 ```
 
 ---
@@ -149,7 +237,8 @@ Language: html
     <title>Vérification de rue</title>
 </head>
 <body>
-<div class="first"><h1>Résultats de la vérification de rue</h1>
+<div class="container">
+    <h1>Résultats de la vérification de rue</h1>
     <form action="{% url 'verifier_rue' %}" method="get">
         <div>
             <label for="code_postal">Code Postal:</label>
@@ -164,20 +253,36 @@ Language: html
             <input type="text" id="nom_rue" name="nom_rue" placeholder="Entrez le nom de la rue" required>
         </div>
         <button type="submit">Vérifier</button>
-    </form> </div>
+    </form>
     {% if donnees %}
         {% if donnees.erreur %}
-            <p>Erreur : {{ donnees.erreur }}</p>
+            <p class="error">Erreur : {{ donnees.erreur }}</p>
         {% else %}
             <p>{{ donnees.message }}</p>
             {% if donnees.couple_cp_ville_existe %}
-                <h2>Suggestions de rues</h2>
-                {% for suggestion in top_suggestions %}
-                    <p>{{ suggestion.nom_afnor }} - Score de similarité: {{ suggestion.similarity_score }}</p>
-                {% endfor %}
+                <div class="suggestions">
+                    <h2>Suggestions de rues</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nom de la Rue</th>
+                                <th>Score de Similarité</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for suggestion in top_suggestions %}
+                                <tr>
+                                    <td>{{ suggestion.nom_afnor }}</td>
+                                    <td class="similarity-score">{{ suggestion.similarity_score }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             {% endif %}
         {% endif %}
     {% endif %}
+</div>
 </body>
 </html>
 
