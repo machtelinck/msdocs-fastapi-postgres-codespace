@@ -16,7 +16,6 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-
 logger = logging.getLogger(__name__)
 
 model_path = "/workspace/pickle_try/xgb_model.pkl"
@@ -112,6 +111,47 @@ async def verify_cp_ville_rue(code_postal: int, nom_commune: str, nom_rue: str, 
     except Exception as e:
         logger.error("Erreur : %s", e)
         raise HTTPException(status_code=500, detail="Erreur interne du serveur")
+
+@app.get("/verify_address/")
+async def verify_address(code_postal: int, nom_commune: str, nom_rue: str, numero: int, rep: str = None, db: Session = Depends(get_db)):
+    try:
+        logger.info("Verifying address for code postal %d, ville %s, rue %s, numero %d, rep %s", 
+                    code_postal, nom_commune, nom_rue, numero, rep)
+        
+        # First, call the existing verify_cp_ville_rue endpoint to check if the street exists
+        rue_check = await verify_cp_ville_rue(code_postal, nom_commune, nom_rue, db)
+        
+        if "La rue existe" in rue_check["message"]:
+            # If the street exists, check the number and repetition
+            sql_address = """
+                SELECT EXISTS (
+                    SELECT 1 FROM table_name
+                    WHERE code_postal = :code_postal
+                    AND LOWER(nom_commune) = LOWER(:nom_commune)
+                    AND LOWER(nom_afnor) = LOWER(:nom_rue)
+                    AND numero = :numero
+                    AND (:rep IS NULL OR LOWER(rep) = LOWER(:rep))
+                )
+            """
+            address_exists = db.execute(text(sql_address), {
+                "code_postal": code_postal,
+                "nom_commune": nom_commune.lower(),
+                "nom_rue": nom_rue.lower(),
+                "numero": numero,
+                "rep": rep.lower() if rep else None
+            }).scalar()
+            
+            if address_exists:
+                return {"message": "L'adresse existe.", "address_exists": True}
+            else:
+                return {"message": "Le numéro de rue ou la répétition n'existe pas pour l'adresse spécifiée.", "address_exists": False}
+        else:
+            return rue_check
+    except Exception as e:
+        logger.error("Erreur : %s", e)
+        raise HTTPException(status_code=500, detail="Erreur interne du serveur")
+
+
 
 @app.get("/test_calculate_features/")
 async def test_calculate_features():

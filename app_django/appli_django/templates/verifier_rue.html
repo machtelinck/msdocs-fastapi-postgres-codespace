@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="../../static/css/style.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <title>Vérification de rue</title>
 </head>
 <body>
@@ -34,6 +35,7 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>Code Postal</th>
                                 <th>Nom de la Rue</th>
                                 <th>Score de Similarité</th>
                             </tr>
@@ -41,6 +43,7 @@
                         <tbody>
                             {% for suggestion in top_suggestions %}
                                 <tr>
+                                    <td>{{ request.GET.code_postal }}</td>
                                     <td>{{ suggestion.nom_afnor }}</td>
                                     <td class="similarity-score">{{ suggestion.similarity_score }}</td>
                                 </tr>
@@ -51,6 +54,9 @@
             {% endif %}
         {% endif %}
     {% endif %}
+    <div>
+        <a href="{% url 'verify_address' %}">Vérifier Adresse Complète</a>
+    </div>
 </div>
 </body>
 </html>

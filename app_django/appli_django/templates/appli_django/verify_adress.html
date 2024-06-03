@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Vérification d'Adresse Complète</title>
+</head>
+<body>
+<div class="container">
+    <h1>Vérification d'Adresse Complète</h1>
+    <form action="{% url 'verify_address' %}" method="get">
+        <div>
+            <label for="code_postal">Code Postal:</label>
+            <input type="text" id="code_postal" name="code_postal" placeholder="Entrez le code postal" required>
+        </div>
+        <div>
+            <label for="nom_commune">Nom de Commune:</label>
+            <input type="text" id="nom_commune" name="nom_commune" placeholder="Entrez le nom de la commune" required>
+        </div>
+        <div>
+            <label for="nom_rue">Nom de Rue:</label>
+            <input type="text" id="nom_rue" name="nom_rue" placeholder="Entrez le nom de la rue" required>
+        </div>
+        <div>
+            <label for="numero">Numéro:</label>
+            <input type="text" id="numero" name="numero" placeholder="Entrez le numéro" required>
+        </div>
+        <div>
+            <label for="rep">Répétition:</label>
+            <input type="text" id="rep" name="rep" placeholder="Entrez la répétition">
+        </div>
+        <button type="submit">Vérifier Adresse Complète</button>
+    </form>
+    {% if donnees %}
+        {% if donnees.erreur %}
+            <p class="error">Erreur : {{ donnees.erreur }}</p>
+        {% else %}
+            <p>{{ donnees.message }}</p>
+            {% if donnees.address_exists %}
+                <p>L'adresse existe.</p>
+            {% else %}
+                <p>L'adresse n'existe pas.</p>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    <a href="{% url 'home' %}">Retour à la page d'accueil</a>
+</div>
+</body>
+</html>

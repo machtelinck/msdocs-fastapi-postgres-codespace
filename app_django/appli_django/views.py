@@ -17,10 +17,12 @@ def verifier_rue(request):
 
     if reponse.status_code == 200 and reponse.content:
         donnees = reponse.json()
-        # Vérifiez si 'top_suggestions' est présent dans les données
-        top_suggestions = donnees.get('top_suggestions', [])  # Utilisez une liste vide comme valeur par défaut
+        top_suggestions = donnees.get('top_suggestions', [])
     else:
         donnees = {'erreur': 'Impossible de récupérer les données ou réponse vide'}
-        top_suggestions = []  # Initialisez top_suggestions comme une liste vide dans ce cas
+        top_suggestions = []
 
     return render(request, 'verifier_rue.html', {'donnees': donnees, 'top_suggestions': top_suggestions})
+
+def verify_address_view(request):
+    return render(request, 'verify_address.html')

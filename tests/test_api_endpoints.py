@@ -56,3 +56,17 @@ def test_similarity():
     data = response.json()
     assert "damerau_levenshtein" in data, "Expected 'damerau_levenshtein' in response JSON"
     assert "jaro_winkler" in data, "Expected 'jaro_winkler' in response JSON"
+
+def test_verify_address():
+    response = client.get("/verify_address/", params={
+        "code_postal": 59000,
+        "nom_commune": "LILLE",
+        "nom_rue": "RUE DES OEILLETS",
+        "numero": 1,
+        "rep": ""
+    })
+    print_response_details(response)
+    assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
+    data = response.json()
+    assert "address_exists" in data, "Expected 'address_exists' in response JSON"
+    assert data["address_exists"], "Expected address to exist"
